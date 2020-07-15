@@ -1,5 +1,24 @@
 # sealjs
 
+JavaScript library for the [Sealax](https://github.com/sealas/sealax) backend.
+
+## User Client
+
+```js
+import { userClient } from 'sealjs'
+
+// Request validation token via email
+const resp = await userClient.createUserToken(email)
+
+// Create user with email, password and emailed validation token
+const user = await userClient.createUser(resp.token, email, pw)
+
+// Request auth token for API requests
+const authResp = await userClient.authenticate(email, pw)
+```
+
+## Item Channel
+
 ```js
 import { ItemChannel } from 'sealjs'
 
@@ -20,10 +39,8 @@ channel.on('update_item', (item) => {
 channel.on('add_item', (id) => {
   // Handling single deleted item
 })
-```
 
-
-```js
+// Connect to backend with user's credentials
 await channel.connect(emailFromForm, passFromForm)
 
 try {
