@@ -1,6 +1,6 @@
 # sealjs
 
-```
+```js
 import { ItemChannel } from 'sealjs'
 
 const channel = new ItemChannel()
@@ -23,7 +23,7 @@ channel.on('add_item', (id) => {
 ```
 
 
-```
+```js
 await channel.connect(emailFromForm, passFromForm)
 
 try {
