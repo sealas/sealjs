@@ -1,13 +1,9 @@
 import { Socket } from 'phoenix'
-import userClient from './userClient'
 import crypto from './crypto'
 
 export default class {
   constructor () {
     this.bindings = []
-
-    this.email = null
-    this.pass = null
 
     this.params = {
       token: null
@@ -26,16 +22,11 @@ export default class {
     })
   }
 
-  async connect (email, pass) {
-    this.email = email
-    this.pass = pass
-
-    const authResp = await userClient.authenticate(email, pass)
-
+  async connect (authResp) {
     this.params.token = authResp.token
     this.accountId = authResp.account_id
 
-    this.userKey = await crypto.deriveKey(pass, authResp.appkey_salt)
+    this.userKey = await crypto.deriveKey(authResp.pass, authResp.appkey_salt)
     this.appKeysPackage = JSON.parse(await crypto.decrypt(this.userKey, authResp.appkey))
 
     this.socket.connect()
@@ -123,6 +114,8 @@ export default class {
         return resp.payload()
       case 'error':
         throw new Error(resp.payload())
+      default:
+        console.error('UNKNOWN ADD RESPONSE', resp)
     }
   }
 
@@ -138,15 +131,33 @@ export default class {
       item.content_type = typeHash
     }
 
-    return this.channel.push('update_item', {
+    const resp = await this.channel.push('update_item', {
       id,
       item
     })
+
+    switch (resp.event) {
+      case 'update_item':
+        return resp.payload()
+      case 'error':
+        throw new Error(resp.payload())
+      default:
+        console.error('UNKNOWN UPDATE RESPONSE', resp)
+    }
   }
 
   async delete (id) {
-    return this.channel.push('delete_item', {
+    const resp = await this.channel.push('delete_item', {
       id
     })
+
+    switch (resp.event) {
+      case 'delete_item':
+        return resp.payload()
+      case 'error':
+        throw new Error(resp.payload())
+      default:
+        console.error('UNKNOWN DELETE RESPONSE', resp)
+    }
   }
 }

@@ -1,5 +1,5 @@
 import axios from 'axios'
-import user from './user'
+import userCrypto from './userCrypto'
 import crypto from './crypto'
 
 export default {
@@ -7,6 +7,29 @@ export default {
     const result = await axios.post(`${process.env.VUE_APP_BACKEND_URL}/auth`, {
       email,
       password: await crypto.deriveKey(pass, 'passwordSalt')
+    })
+
+    return {
+      ...result.data,
+      pass
+    }
+  },
+
+  async authenticateWithTFA (authResp, authKey) {
+    const result = await axios.post(`${process.env.VUE_APP_BACKEND_URL}/auth`, {
+      token: authResp.token,
+      auth_key: authKey
+    })
+
+    return {
+      ...result.data,
+      pass: authResp.pass
+    }
+  },
+
+  async refreshUserToken (token) {
+    const result = await axios.post(`${process.env.VUE_APP_BACKEND_URL}/auth`, {
+      token
     })
 
     return result.data
@@ -21,7 +44,7 @@ export default {
   },
 
   async createUser (token, email, pass, passHint) {
-    const userPackage = await user.generateAppKeysPackage(pass)
+    const userPackage = await userCrypto.generateAppKeysPackage(pass)
 
     const result = await axios.post(`${process.env.VUE_APP_BACKEND_URL}/auth/registration`, {
       token,

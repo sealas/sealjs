@@ -1,12 +1,12 @@
 import crypto from './crypto'
-import user from './user'
+import userCrypto from './userCrypto'
 import userClient from './userClient'
 
 import ItemChannel from './itemChannel'
 
 export {
   crypto,
-  user,
+  userCrypto,
   userClient,
   ItemChannel
 }
