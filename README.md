@@ -14,7 +14,16 @@ const resp = await userClient.createUserToken(email)
 const user = await userClient.createUser(resp.token, email, pw)
 
 // Request auth token for API requests
-const authResp = await userClient.authenticate(email, pw)
+let authResp
+try {
+  authResp = await userClient.authenticate(email, pw)
+
+  if (authResp.tfa) {
+    authResp = await userClient.authenticateWithTFA(authResp, 'YUBIKEY_CODE_HERE')
+  }
+} catch (e) {
+  // Handle error
+}
 ```
 
 ## Item Channel
@@ -40,8 +49,8 @@ channel.on('add_item', (id) => {
   // Handling single deleted item
 })
 
-// Connect to backend with user's credentials
-await channel.connect(emailFromForm, passFromForm)
+// Connect to backend with authResp from userClient.authenticate
+await channel.connect(authResp)
 
 try {
   const result = await channel.create({
